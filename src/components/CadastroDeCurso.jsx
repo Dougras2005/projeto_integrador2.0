@@ -1,8 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, BookOpen, Clock } from 'lucide-react';
 import { supabaseClient } from '../services/supabase.js';
-
 
 const CadastroDeCurso = ({ onNavigateHome }) => {
   const [cursos, setCursos] = useState([]);
@@ -301,6 +299,7 @@ const CursoRegistrationForm = ({ onSubmit, initialData = null, onCancel = null }
           type="text"
           id="nomecurso"
           name="nomecurso"
+          data-testid="input-nomecurso"
           className={`form-input ${errors.nomecurso ? 'error' : ''}`}
           value={formData.nomecurso}
           onChange={handleChange}
@@ -317,6 +316,7 @@ const CursoRegistrationForm = ({ onSubmit, initialData = null, onCancel = null }
           type="number"
           id="cargahoraria"
           name="cargahoraria"
+          data-testid="input-cargahoraria"
           className={`form-input ${errors.cargahoraria ? 'error' : ''}`}
           value={formData.cargahoraria}
           onChange={handleChange}
@@ -331,7 +331,7 @@ const CursoRegistrationForm = ({ onSubmit, initialData = null, onCancel = null }
             Cancelar
           </button>
         )}
-        <button type="submit" className="btn-save" disabled={isSubmitting}>
+        <button type="submit" className="btn-save" data-testid="btn-save" disabled={isSubmitting}>
           {isSubmitting ? 'Salvando...' : (initialData ? 'Atualizar Curso' : 'Salvar Curso')}
         </button>
       </div>
@@ -340,3 +340,5 @@ const CursoRegistrationForm = ({ onSubmit, initialData = null, onCancel = null }
 };
 
 export default CadastroDeCurso;
+export { CursoRegistrationForm };
+

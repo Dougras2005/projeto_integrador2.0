@@ -1,54 +1,68 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import CadastroDeCurso from '../components/CadastroDeCurso';
 
+// Importa o form separado, já que você o declarou dentro do arquivo
+import { CursoRegistrationForm } from '../components/CadastroDeCurso';
+
 test('renderiza inputs de Nome do Curso e Carga Horária do Curso', () => {
-  render(<CadastroDeCurso />);
+  render(<CadastroDeCurso onNavigateHome={() => {}} />);
 
   expect(screen.getByLabelText(/Nome do Curso/i)).toBeInTheDocument();
-  expect(screen.getByLabelText(/Carga Horária do Curso/i)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Carga Horária/i)).toBeInTheDocument();
 });
 
-test('chama onSubmit com dados corretos', () => {
+test('chama onSubmit com dados corretos ao cadastrar novo curso', () => {
   const handleSubmit = jest.fn();
-  render(<CadastroDeCurso onSubmit={handleSubmit} />);
+  render(<CursoRegistrationForm onSubmit={handleSubmit} />);
 
   fireEvent.change(screen.getByLabelText(/Nome do Curso/i), { target: { value: 'Java' } });
-  fireEvent.change(screen.getByLabelText(/Carga Horária do Curso/i), { target: { value: '1300' } });
+  fireEvent.change(screen.getByLabelText(/Carga Horária/i), { target: { value: 1300 } });
 
-  fireEvent.submit(screen.getByTestId('cadastro-de-curso'));
+  fireEvent.click(screen.getByTestId('btn-save'));
 
   expect(handleSubmit).toHaveBeenCalledWith({
-    nomeCurso: 'Java',
-    cargaHoraria: 1300,
+    nomecurso: 'Java',
+    cargahoraria: 1300,
   });
 });
 
-test('atualiza curso existente', () => {
+test('atualiza curso existente mantendo valores não alterados', () => {
   const handleSubmit = jest.fn();
-  const contatoExistente = {
-    nomeCurso: 'Java',
-    cargaHoraria: 1300,
+  const cursoExistente = {
+    nomecurso: 'Java',
+    cargahoraria: 1300,
   };
 
-  render(<CadastroDeCurso contact={contatoExistente} onSubmit={handleSubmit} />);
+  render(<CursoRegistrationForm onSubmit={handleSubmit} initialData={cursoExistente} />);
 
   fireEvent.change(screen.getByLabelText(/Nome do Curso/i), { target: { value: 'Técnico em Informática' } });
-  fireEvent.submit(screen.getByTestId('cadastro-de-curso'));
+  fireEvent.click(screen.getByTestId('btn-save'));
 
   expect(handleSubmit).toHaveBeenCalledWith({
-    nomeCurso: 'Técnico em Informática',
-    cargaHoraria: 1300, // mantém o valor original se não mudar
+    nomecurso: 'Técnico em Informática',
+    cargahoraria: 1300, // mantém o valor original se não mudar
   });
 });
 
 test('valida que os campos obrigatórios foram preenchidos', () => {
   const handleSubmit = jest.fn();
-  render(<CadastroDeCurso onSubmit={handleSubmit} />);
+  render(<CursoRegistrationForm onSubmit={handleSubmit} />);
 
-  fireEvent.submit(screen.getByTestId('cadastro-de-curso'));
+  fireEvent.click(screen.getByTestId('btn-save'));
 
-  expect(screen.getByText(/Nome do Curso é obrigatório/i)).toBeInTheDocument();
-  expect(screen.getByText(/Carga Horária do Curso é obrigatório/i)).toBeInTheDocument();
+  expect(screen.getByText(/Nome do curso é obrigatório/i)).toBeInTheDocument();
+  expect(screen.getByText(/Carga horária é obrigatória/i)).toBeInTheDocument();
 
   expect(handleSubmit).not.toHaveBeenCalled();
+});
+
+test('exibe mensagem quando não há cursos cadastrados', async () => {
+  // Mock do retorno do supabase
+  supabaseClient.from().select().order.mockResolvedValue({ data: [], error: null });
+
+  render(<CadastroDeCurso onNavigateHome={() => {}} />);
+
+  // Espera a mensagem "nenhum curso cadastrado"
+  const message = await screen.findByText(/nenhum curso cadastrado/i);
+  expect(message).toBeInTheDocument();
 });
